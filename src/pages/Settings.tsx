@@ -240,10 +240,12 @@ function ApiSection() {
   -H "Content-Type: application/json" \\
   -d '{
     "type": "takeaway",
+    "platform": "whatsapp",
     "items": [
       { "product_id": "b0000000-0000-0000-0000-000000000001", "qty": 2, "note": "بدون بصل" }
     ],
-    "customer_name": "اسم العميل"
+    "customer_name": "أحمد محمد",
+    "customer_phone": "01012345678"
   }'`;
 
   return (

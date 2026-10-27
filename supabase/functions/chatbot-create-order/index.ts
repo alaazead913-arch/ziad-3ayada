@@ -16,8 +16,15 @@ interface IncomingOrder {
   type: "dine_in" | "takeaway" | "delivery";
   items: IncomingItem[];
   customer_name?: string;
+  customer?: { name?: string; phone?: string };
+  from_name?: string;
+  sender_name?: string;
+  name?: string;
   customer_phone?: string;
+  phone?: string;
+  from_phone?: string;
   delivery_address?: string;
+  address?: string;
   discount?: number;
   tax_rate?: number;
   note?: string;
@@ -38,6 +45,22 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = (await req.json()) as IncomingOrder;
+
+    // ---- Normalize customer fields (accept multiple chatbot formats) ----
+    const customerName =
+      body.customer_name ||
+      body.customer?.name ||
+      body.from_name ||
+      body.sender_name ||
+      body.name ||
+      null;
+    const customerPhone =
+      body.customer_phone ||
+      body.customer?.phone ||
+      body.phone ||
+      body.from_phone ||
+      null;
+    const deliveryAddress = body.delivery_address || body.address || null;
 
     // ---- Validate ----
     if (!body || !body.items || !Array.isArray(body.items) || body.items.length === 0) {
@@ -150,9 +173,9 @@ Deno.serve(async (req: Request) => {
       .insert({
         number: nextNumber,
         type: body.type,
-        customer_name: body.customer_name ?? null,
-        customer_phone: body.customer_phone ?? null,
-        delivery_address: body.delivery_address ?? null,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        delivery_address: deliveryAddress,
         status: "paid",
         subtotal,
         discount,
@@ -216,9 +239,9 @@ Deno.serve(async (req: Request) => {
           status: order.status,
           source: order.source,
           platform,
-          customer_name: order.customer_name,
-          customer_phone: order.customer_phone,
-          delivery_address: order.delivery_address,
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          delivery_address: deliveryAddress,
           subtotal: Number(order.subtotal),
           discount: Number(order.discount),
           tax_rate: Number(order.tax_rate),
