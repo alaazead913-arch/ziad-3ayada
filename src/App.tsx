@@ -13,6 +13,7 @@ import { ReportsPage } from '@/pages/Reports';
 import { UsersPage } from '@/pages/Users';
 import { SettingsPage } from '@/pages/Settings';
 import { ShiftModal } from '@/pages/Shifts';
+import { ChatbotOrdersPage } from '@/pages/ChatbotOrders';
 
 const PAGE_TITLES: Record<PageKey, string> = {
   dashboard: 'لوحة التحكم',
@@ -24,6 +25,7 @@ const PAGE_TITLES: Record<PageKey, string> = {
   reports: 'التقارير',
   users: 'المستخدمون',
   settings: 'الإعدادات',
+  'chatbot-orders': 'طلبات الشات بوت',
 };
 
 function Shell() {
@@ -76,6 +78,7 @@ function Shell() {
           {page === 'reports' && <ReportsPage />}
           {page === 'users' && <UsersPage />}
           {page === 'settings' && <SettingsPage />}
+          {page === 'chatbot-orders' && <ChatbotOrdersPage />}
         </main>
       </div>
       <ShiftModal open={shiftOpen} onClose={() => setShiftOpen(false)} />

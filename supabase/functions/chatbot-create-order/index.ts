@@ -21,6 +21,7 @@ interface IncomingOrder {
   discount?: number;
   tax_rate?: number;
   note?: string;
+  platform?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -141,6 +142,8 @@ Deno.serve(async (req: Request) => {
       ? String(parseInt(lastOrder.number, 10) + 1)
       : "1001";
 
+    const platform = body.platform ?? "chatbot";
+
     // ---- Insert order ----
     const { data: order, error: orderErr } = await supabase
       .from("orders")
@@ -156,8 +159,16 @@ Deno.serve(async (req: Request) => {
         tax_rate: taxRate,
         tax_amount: taxAmount,
         total,
+        paid: total,
+        is_credit: false,
+        payments: [{ method: "cash", amount: total }],
         source: "chatbot",
         note: body.note ?? null,
+        cashier_id: null,
+        cashier_name: `بوت ${platform}`,
+        paid_at: new Date().toISOString(),
+        cancel_reason: null,
+        return_reason: null,
       })
       .select()
       .single();
@@ -173,12 +184,26 @@ Deno.serve(async (req: Request) => {
       qty: i.qty,
       line_total: i.line_total,
       note: i.note,
+      size_name: null,
+      addons: [],
+      line_discount: 0,
     }));
     const { error: itemsErr } = await supabase
       .from("order_items")
       .insert(itemsToInsert);
 
     if (itemsErr) throw itemsErr;
+
+    // ---- Deduct stock for tracked products ----
+    for (const item of orderItems) {
+      const p = productMap.get(item.product_id);
+      if (p && p.track_stock) {
+        await supabase
+          .from("products")
+          .update({ available: Math.max(0, Number(p.available) - item.qty) })
+          .eq("id", item.product_id);
+      }
+    }
 
     // ---- Return receipt-shaped response for the chatbot ----
     return new Response(
@@ -190,6 +215,7 @@ Deno.serve(async (req: Request) => {
           type: order.type,
           status: order.status,
           source: order.source,
+          platform,
           customer_name: order.customer_name,
           customer_phone: order.customer_phone,
           delivery_address: order.delivery_address,

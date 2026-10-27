@@ -4,16 +4,18 @@ import { ROLE_LABELS } from '@/lib/format';
 import {
   LayoutDashboard, ShoppingCart, Package, Boxes, Truck,
   Wallet, BarChart3, Users, Settings as SettingsIcon,
-  ChevronRight, LogOut, Store, ChefHat,
+  ChevronRight, LogOut, Store, ChefHat, MessageCircle,
 } from 'lucide-react';
 
 export type PageKey =
   | 'dashboard' | 'pos' | 'products' | 'inventory'
-  | 'purchases' | 'expenses' | 'reports' | 'users' | 'settings';
+  | 'purchases' | 'expenses' | 'reports' | 'users' | 'settings'
+  | 'chatbot-orders';
 
 const NAV: { key: PageKey; label: string; icon: any; perm?: string }[] = [
   { key: 'dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
   { key: 'pos',       label: 'نقطة البيع',  icon: ShoppingCart },
+  { key: 'chatbot-orders', label: 'طلبات الشات بوت', icon: MessageCircle },
   { key: 'products',  label: 'الأصناف',     icon: Package, perm: 'manage_settings' },
   { key: 'inventory', label: 'المخزون',     icon: Boxes, perm: 'manage_inventory' },
   { key: 'purchases', label: 'المشتريات',   icon: Truck, perm: 'manage_purchases' },

@@ -5,11 +5,8 @@ import type {
 } from '@/types';
 import { money, fmt, uid, uid2, ORDER_TYPE_LABELS } from '@/lib/format';
 import { Modal, ConfirmDialog } from '@/components/ui';
-import {
-  Search, Plus, Minus, Trash2, ShoppingCart, UtensilsCrossed,
-  Bike, ShoppingBag, X, Printer, Send, CreditCard, User as UserIcon, Phone,
-  StickyNote, Percent, CheckCircle2, ChefHat, ArrowRight,
-} from 'lucide-react';
+import { saveOrderToDb } from '@/lib/ordersApi';
+import { Search, Plus, Minus, Trash2, ShoppingCart, UtensilsCrossed, Bike, ShoppingBag, X, Printer, Send, CreditCard, User as UserIcon, Phone, StickyNote, Percent, CircleCheck as CheckCircle2, ChefHat, ArrowRight } from 'lucide-react';
 
 interface CartLine extends OrderLine {}
 interface DraftOrder {
@@ -25,7 +22,7 @@ interface DraftOrder {
 const EMPTY_DRAFT: DraftOrder = { type: 'dine_in' };
 
 export function POS() {
-  const { products, categories, orders, setOrders, settings, currentUser, can, toast, logAction, setMovements, movements } = useStore();
+  const { products, categories, orders, setOrders, settings, currentUser, can, toast, logAction, setMovements, movements, dbProductMap } = useStore();
   const [draft, setDraft] = useState<DraftOrder>(EMPTY_DRAFT);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [search, setSearch] = useState('');
@@ -187,6 +184,13 @@ export function POS() {
     setLastOrder(order);
     setPayOpen(false);
     clearCart();
+
+    // Persist to Supabase (fire-and-forget; surface error via toast)
+    saveOrderToDb(order, products, dbProductMap).then((res) => {
+      if (!res.success) {
+        toast('error', 'تعذّر حفظ الطلب في قاعدة البيانات');
+      }
+    });
   };
 
   const sendToKitchen = () => {

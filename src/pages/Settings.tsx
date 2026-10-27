@@ -166,8 +166,8 @@ export function SettingsPage() {
 // ============================================================================
 // Chatbot API section — shows the two endpoints + curl commands
 // ============================================================================
-const API_BASE = 'https://fqzhvtatfwpoxuqqxvni.supabase.co/functions/v1';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxemh2dGF0Zndwb3h1cXF4dm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNzEyMzUsImV4cCI6MjEwODY0NzIzNX0.N3aTh3in5ZsoFedgHMfVOp_P8O2iZUVSHZDHRCj2XHY';
+const API_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);

@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type {
   Order, Product, Category, Purchase, Shift, Expense, Settings,
   User, AuditEntry, StockMovement, CurrentUser,
 } from '@/types';
 import * as mock from '@/lib/mockData';
+import { fetchDbProductMap, fetchOrdersFromDb } from '@/lib/ordersApi';
 
 export interface ToastMsg {
   id: string;
@@ -40,6 +41,9 @@ interface StoreValue {
   toasts: ToastMsg[];
   toast: (type: ToastMsg['type'], text: string) => void;
   dismissToast: (id: string) => void;
+  // db
+  dbProductMap: Map<string, string>;
+  dbLoaded: boolean;
   // permissions
   can: (perm: string) => boolean;
   // audit helper
@@ -61,6 +65,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [audit, setAudit] = useState<AuditEntry[]>(mock.auditLog);
   const [movements, setMovements] = useState<StockMovement[]>(mock.stockMovements);
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
+  const [dbProductMap, setDbProductMap] = useState<Map<string, string>>(new Map());
+  const [dbLoaded, setDbLoaded] = useState(false);
+
+  // Load orders + product-code map from Supabase on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [map, dbOrders] = await Promise.all([
+        fetchDbProductMap(),
+        fetchOrdersFromDb(),
+      ]);
+      if (cancelled) return;
+      setDbProductMap(map);
+      if (dbOrders.length > 0) {
+        setOrders((prev) => {
+          const dbIds = new Set(dbOrders.map((o) => o.id));
+          return [...dbOrders, ...prev.filter((o) => !dbIds.has(o.id))];
+        });
+      }
+      setDbLoaded(true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toast = useCallback((type: ToastMsg['type'], text: string) => {
     const id = `t_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
@@ -113,6 +140,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     audit, setAudit,
     movements, setMovements,
     toasts, toast, dismissToast,
+    dbProductMap, dbLoaded,
     can, logAction,
   };
 
