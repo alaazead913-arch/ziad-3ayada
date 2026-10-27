@@ -204,7 +204,7 @@ Deno.serve(async (req: Request) => {
         source: "chatbot",
         note: body.note ?? null,
         cashier_id: null,
-        cashier_name: `بوت ${platform}`,
+        cashier_name: "بوت",
         paid_at: new Date().toISOString(),
         cancel_reason: null,
         return_reason: null,
