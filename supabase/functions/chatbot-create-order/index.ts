@@ -29,6 +29,28 @@ interface IncomingOrder {
   tax_rate?: number;
   note?: string;
   platform?: string;
+  [key: string]: unknown;
+}
+
+const placeholderNames = new Set(["اسم العميل", "اسم العميل الحقيقي", "customer name", "customer"]);
+
+function isUsableName(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0 && !placeholderNames.has(value.trim().toLowerCase());
+}
+
+function findCustomerName(value: unknown, key = ""): string | null {
+  if (isUsableName(value) && /name|profile|contact|sender|customer|from|user|push/i.test(key)) return value.trim();
+  if (!value || typeof value !== "object") return null;
+
+  for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
+    if (/items|products|lines|body|text|message/i.test(childKey)) continue;
+    if (/name|full_name|display_name|pushname|push_name|customer_name|sender_name|from_name/i.test(childKey) && isUsableName(childValue)) {
+      return childValue.trim();
+    }
+    const nestedName = findCustomerName(childValue, childKey);
+    if (nestedName) return nestedName;
+  }
+  return null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -46,14 +68,8 @@ Deno.serve(async (req: Request) => {
   try {
     const body = (await req.json()) as IncomingOrder;
 
-    // ---- Normalize customer fields (accept multiple chatbot formats) ----
-    const customerName =
-      body.customer_name ||
-      body.customer?.name ||
-      body.from_name ||
-      body.sender_name ||
-      body.name ||
-      null;
+    // ---- Normalize customer fields from common chatbot payload formats ----
+    const customerName = findCustomerName(body);
     const customerPhone =
       body.customer_phone ||
       body.customer?.phone ||
@@ -76,7 +92,7 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    if (body.type === "delivery" && !body.delivery_address) {
+    if (body.type === "delivery" && !deliveryAddress) {
       return new Response(
         JSON.stringify({ error: "عنوان التوصيل مطلوب لطلبات الديليفري" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
