@@ -1,0 +1,5 @@
+[functions.chatbot-menu]
+verify_jwt = false
+
+[functions.chatbot-create-order]
+verify_jwt = false

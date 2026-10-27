@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+  }
+  body {
+    @apply bg-ink-100 text-ink-800 antialiased;
+    font-feature-settings: 'kern', 'liga', 'calt';
+  }
+  /* Numeric alignment for Arabic context */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ink-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-400;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-ink-100;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl
+           transition-all duration-150 active:scale-[0.97] select-none
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 px-4 py-2.5 shadow-sm;
+  }
+  .btn-ghost {
+    @apply btn text-ink-600 hover:bg-ink-100 px-3 py-2;
+  }
+  .btn-outline {
+    @apply btn border border-ink-200 text-ink-700 hover:bg-ink-50 px-4 py-2.5 bg-white;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5
+           text-sm text-ink-800 placeholder:text-ink-400
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent
+           transition;
+  }
+  .label {
+    @apply block text-sm font-medium text-ink-600 mb-1.5;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .table-row {
+    @apply border-b border-ink-100 last:border-0 hover:bg-ink-50/60 transition-colors;
+  }
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold
+           text-ink-500 hover:bg-ink-100 hover:text-ink-800 transition-all;
+  }
+  .nav-link-active {
+    @apply bg-primary-50 text-primary-700 hover:bg-primary-50 hover:text-primary-700;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+}
