@@ -43,7 +43,7 @@ function findCustomerName(value: unknown, key = ""): string | null {
   if (!value || typeof value !== "object") return null;
 
   for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
-    if (/items|products|lines|body|text|message/i.test(childKey)) continue;
+    if (/items|products|lines|text|content/i.test(childKey)) continue;
     if (/name|full_name|display_name|pushname|push_name|customer_name|sender_name|from_name/i.test(childKey) && isUsableName(childValue)) {
       return childValue.trim();
     }
